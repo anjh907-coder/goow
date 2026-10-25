@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>구글 워크스페이스 & Apps Script 실습 가이드 북</title>
+  <meta name="description" content="구글 드라이브, 문서, 설문지, 스프레드시트, Apps Script 자동화까지 따라 하며 배우는 인터랙티브 실습 가이드북">
+  
+  <!-- Pretendard Font CDN -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          },
+          fontFamily: {
+            sans: ['"Pretendard Variable"', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #F8F9FA;
+      color: #1F2937;
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="flex h-screen flex-col overflow-hidden bg-[#F8F9FA] text-[#1F2937]">
+
+  <!-- Top Header Bar -->
+  <header class="flex h-16 w-full shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 shadow-xs z-30">
+    <!-- Left: Hamburger & Brand -->
+    <div class="flex items-center gap-3">
+      <button id="toggle-sidebar-btn" class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors" title="목차 열기/닫기">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="flex items-center gap-2.5">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-sm shadow-xs">
+          G
+        </span>
+        <div class="hidden sm:block">
+          <h1 class="text-sm font-bold text-slate-900 leading-tight">구글 워크스페이스 & Apps Script</h1>
+          <p class="text-[11px] font-medium text-slate-500">인터랙티브 실습 가이드 북</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Page Navigation [<] 1 / 20 [>] & Breadcrumb -->
+    <div class="flex items-center gap-3 px-2 text-center">
+      <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1 border border-slate-200">
+        <button id="header-prev-btn" class="flex h-7 w-7 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-slate-900 transition-all disabled:opacity-30">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+        <span id="slide-counter" class="px-2 text-xs font-semibold tabular-nums text-slate-800 whitespace-nowrap">
+          1 / 20
+        </span>
+        <button id="header-next-btn" class="flex h-7 w-7 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-slate-900 transition-all disabled:opacity-30">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+      </div>
+
+      <div id="breadcrumb-title" class="hidden md:flex items-center gap-1.5 text-xs text-slate-600 truncate max-w-md">
+        <span class="font-semibold text-indigo-700 whitespace-nowrap">1교시</span>
+        <span class="text-slate-400">›</span>
+        <span class="text-slate-800 font-medium truncate">Step 1. 구글 드라이브 폴더 생성 및 권한 설정</span>
+      </div>
+    </div>
+
+    <!-- Right: Checkpoint & Fullscreen Buttons -->
+    <div class="flex items-center gap-2">
+      <button id="open-checkpoints-btn" class="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-indigo-600 transition-colors">
+        <i class="fa-solid fa-square-check text-indigo-600"></i>
+        <span>체크포인트 모음</span>
+      </button>
+
+      <button id="fullscreen-btn" class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors" title="전체화면 토글">
+        <i class="fa-solid fa-expand text-sm"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Body Content Split: Sidebar + Main Area -->
+  <div class="relative flex flex-1 overflow-hidden">
+
+    <!-- Mobile Overlay Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-black/30 backdrop-blur-xs lg:hidden"></div>
+
+    <!-- Left Sidebar (Accordion Navigation) -->
+    <aside id="sidebar" class="fixed top-16 bottom-0 left-0 z-50 flex w-76 flex-col border-r border-slate-200 bg-white transition-transform duration-300 ease-in-out -translate-x-full lg:static lg:translate-x-0">
+      <!-- Sidebar Header -->
+      <div class="flex h-12 items-center justify-between border-b border-slate-200 px-4">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-indigo-600 text-sm"></i>
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wide">실습 가이드 목차</h2>
+        </div>
+        <button id="close-sidebar-btn" class="flex h-7 w-7 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-800" title="목차 닫기">
+          <i class="fa-solid fa-angles-left text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Accordion Lesson List Container -->
+      <div id="accordion-container" class="flex-1 overflow-y-auto p-3 space-y-2">
+        <!-- Generated by JavaScript -->
+      </div>
+
+      <!-- Sidebar Bottom Checkpoint Shortcut -->
+      <div class="border-t border-slate-200 p-3 bg-slate-50">
+        <button id="sidebar-checkpoints-btn" class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-all">
+          <i class="fa-solid fa-square-check text-indigo-600"></i>
+          <span>체크포인트 모음 바로가기</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
+      <div id="slide-card-container" class="mx-auto max-w-4xl space-y-6">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer Bar -->
+  <footer class="h-16 shrink-0 border-t border-slate-200 bg-white/95 px-4 sm:px-6 shadow-xs flex items-center justify-between z-30">
+    <div>
+      <button id="footer-prev-btn" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 transition-colors">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>이전</span>
+      </button>
+    </div>
+
+    <div class="hidden sm:flex items-center gap-2 text-xs text-slate-500">
+      <i class="fa-solid fa-keyboard text-slate-400"></i>
+      <span>키보드 <kbd class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-300 font-mono text-[11px] text-slate-700">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-300 font-mono text-[11px] text-slate-700">→</kbd> 또는 <kbd class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-300 font-mono text-[11px] text-slate-700">PageUp/Down</kbd>으로 넘길 수 있어요</span>
+    </div>
+
+    <div>
+      <button id="footer-next-btn" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition-colors">
+        <span>다음</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Checkpoint Master Modal -->
+  <div id="checkpoint-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+    <div class="relative flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        <div class="flex items-center gap-2.5">
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600">
+            <i class="fa-solid fa-square-check text-base"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">전체 실습 점검표 종합 현황판</h3>
+            <p class="text-xs text-slate-500">1교시부터 4교시까지의 실습 수행 및 핵심 체크 항목을 점검합니다</p>
+          </div>
+        </div>
+        <button id="close-modal-btn" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="border-b border-slate-100 bg-slate-50/70 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-xs font-semibold text-slate-500">전체 실습 달성률</span>
+            <div class="flex items-baseline gap-2">
+              <span id="modal-percentage" class="text-2xl font-black text-slate-900 tabular-nums">0%</span>
+              <span id="modal-counts" class="text-xs text-slate-500 tabular-nums">(0 / 0 항목 완료)</span>
+            </div>
+          </div>
+          <button id="modal-reset-btn" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>체크 초기화</span>
+          </button>
+        </div>
+        <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+          <div id="modal-progress-bar" class="h-full bg-indigo-600 transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div id="modal-list-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-200 px-6 py-4 bg-slate-50">
+        <span class="text-xs text-slate-500">체크 상태는 브라우저 로컬 저장소(localStorage)에 보존됩니다.</span>
+        <button id="close-modal-footer-btn" class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 transition-colors">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    // 1. Practice Guidebook Comprehensive Data (With Easy, Beginner-Friendly Korean Terms)
+    const LESSON_DATA = [
+      {
+        id: 1,
+        title: "1교시: 함께 일하는 기초 환경과 스마트 문서 작성",
+        shortTitle: "1교시 구글 드라이브 & 문서",
+        icon: "fa-folder-tree",
+        steps: [
+          {
+            id: "1-1",
+            lessonId: 1,
+            stepNumber: 1,
+            type: "step",
+            lessonTitle: "1교시: 함께 일하는 기초 환경과 스마트 문서 작성",
+            stepTitle: "Step 1. 구글 드라이브 폴더 생성 및 권한 설정",
+            badge: "기초 작업 환경 만들기",
+            objective: "팀원들과 함께 쓸 폴더를 만들고, 파일이 실수로 지워지거나 유출되지 않도록 알맞은 역할을 지정합니다.",
+            description: "구글 드라이브에서 프로젝트 전용 폴더를 만들고, 함께 작업할 사람들의 역할(편집자, 댓글 작성자, 뷰어)을 알맞게 지정합니다. 안전 설정으로 무단 다운로드나 파일 복사를 막아 내용을 보호합니다.",
+            table: {
+              title: "구글 드라이브 권한 유형별 기능 및 추천 대상",
+              headers: ["역할 (권한)", "할 수 있는 작업", "할 수 없는 작업", "추천 대상"],
+              rows: [
+                ["편집자 (수정 가능)", "파일 내용 고치기, 새 파일 추가, 삭제, 공유 변경", "소유자 계정 변경(설정으로 차단 가능)", "함께 기획하고 문서를 직접 작성하는 동료"],
+                ["댓글 작성자 (의견 등록)", "내용 읽기, 의견 댓글 및 수정 제안 남기기", "본문 글자를 직접 지우거나 고치기 불가", "피드백과 검토를 해주는 팀원, 멘토"],
+                ["뷰어 (읽기 전용)", "파일 내용 읽기만 가능", "수정, 의견, 댓글 모두 불가능", "결과물만 확인하는 일반 참가자, 참관인"]
+              ]
+            },
+            callouts: [
+              {
+                type: "warning",
+                title: "실무 안전 팁 (자료 유출 방지)",
+                content: "공유 창 우측 상단 톱니바퀴(설정)를 누른 뒤: ① '편집자가 권한을 변경하고 공유하도록 허용' 체크 해제, ② '뷰어 및 댓글 작성자에게 다운로드, 인쇄, 복사 옵션 표시' 체크를 해제하면 파일이 외부로 함부로 복사되는 것을 막을 수 있습니다."
+              },
+              {
+                type: "tip",
+                title: "폴더 이름 짓는 팁 (쉽게 찾는 규칙)",
+                content: "실습 폴더명을 `[TF] 2026 청년 네트워킹 데이_홍길동` 처럼 `[팀이름] 프로젝트명_이름`으로 통일하면 나중에 검색할 때 바로 찾을 수 있습니다."
+              }
+            ],
+            checklist: [
+              "내 드라이브에 `[TF] 2026 청년 네트워킹 데이_이름` 폴더를 정상적으로 만들었다.",
+              "폴더 우클릭 > 공유 메뉴를 열어 함께할 사람의 이메일을 추가하는 방법을 확인했다.",
+              "공유 톱니바퀴 설정에서 '다운로드/인쇄/복사 옵션' 제한 체크박스를 확인했다."
+            ]
+          },
+          {
+            id: "1-2",
+            lessonId: 1,
+            stepNumber: 2,
+            type: "step",
+            lessonTitle: "1교시: 함께 일하는 기초 환경과 스마트 문서 작성",
+            stepTitle: "Step 2. 구글 문서 생성 및 스마트 칩(@) 활용",
+            badge: "살아있는 스마트 문서",
+            objective: "단순한 글자 문서를 넘어 사람, 날짜, 진행 상태가 바로 연결되는 스마트 문서를 만듭니다.",
+            description: "구글 문서에서 키보드로 `@` 기호를 입력하면 '스마트 칩' 메뉴가 나타납니다. 담당자 프로필, 캘린더 날짜, 업무 진행 상태(대기/진행중/완료) 드롭다운을 칩 형태로 쏙 넣어 직관적인 문서를 작성합니다.",
+            table: {
+              title: "스마트 칩(@) 핵심 기능 정리표",
+              headers: ["스마트 칩 종류", "입력 방법", "주요 기능 및 좋은 점"],
+              rows: [
+                ["@사람 (담당자)", "`@이메일` 또는 이름 입력", "담당자 프로필 사진 표시, 클릭 시 바로 이메일 발송 가능"],
+                ["@날짜 (일정)", "`@오늘`, `@내일` 또는 `@날짜`", "달력이 바로 열려 마감일 선택, 지난 일정은 색상 경고 표시"],
+                ["@드롭다운 (진행상태)", "`@드롭다운` 입력 후 선택", "‘대기 / 진행중 / 완료’ 등 업무 진행도를 버튼식으로 변경"],
+                ["@체크리스트 (할 일)", "도구 모음의 체크리스트 클릭", "완료 시 가로 취소선이 그어지며 클릭으로 진행 상황 확인"]
+              ]
+            },
+            interactiveWidget: "smartchip",
+            callouts: [
+              {
+                type: "key",
+                title: "실무 꿀팁",
+                content: "드롭다운 상태 버튼은 '옵션 수정'을 눌러 나만의 색상과 이름을 자유롭게 만들 수 있습니다. 예: [아이디어 회의] ➔ [자료 작성중] ➔ [최종 확인] ➔ [완료]"
+              }
+            ],
+            checklist: [
+              "실습 폴더 안에 `행사 기획서_이름` 구글 문서를 만들었다.",
+              "@멘션 기능으로 팀원 또는 내 계정을 문서 안에 칩 형태로 넣었다.",
+              "@날짜 칩으로 행사 마감일을 넣고 클릭하여 달력 팝업을 확인했다.",
+              "@드롭다운 칩을 넣어 진행상태(대기, 진행중, 완료)를 설정했다."
+            ]
+          },
+          {
+            id: "1-3",
+            lessonId: 1,
+            stepNumber: 3,
+            type: "step",
+            lessonTitle: "1교시: 함께 일하는 기초 환경과 스마트 문서 작성",
+            stepTitle: "Step 3. 실시간 동시 편집 & 제안 모드(의견 남기기)",
+            badge: "안전한 의견 교환",
+            objective: "원래 작성된 문장을 지우지 않고 안전하게 수정 의견을 제안하고, 동료에게 할 일을 배정합니다.",
+            description: "구글 문서 오른쪽 위의 모드를 '수정'에서 '제안'으로 바꾸면, 글자를 고칠 때 지운 글자는 초록색 취소선으로 남고 새로 쓴 글자는 제안 상자로 등록됩니다. 문서를 망칠 걱정 없이 의견을 주고받을 수 있습니다.",
+            table: {
+              title: "문서 작성 3가지 모드 비교",
+              headers: ["모드 이름", "어떻게 동작하나요?", "이럴 때 쓰세요"],
+              rows: [
+                ["수정 모드", "키보드로 치는 즉시 본문 글자가 바로 바뀝니다", "혼자 초안을 작성하거나 전적으로 내용을 바꿀 때"],
+                ["제안 모드", "지운 글자는 초록색 줄로 남고, 오른쪽에 제안 카드가 생깁니다", "팀원의 글을 검토하거나 문장을 다듬어줄 때"],
+                ["보기 모드", "글자가 써지지 않는 읽기 전용 상태가 됩니다", "최종 인쇄 전 오타를 방지하거나 프레젠테이션 시"]
+              ]
+            },
+            callouts: [
+              {
+                type: "tip",
+                title: "할 일 배정 팁 (+동료이메일)",
+                content: "댓글을 쓸 때 `+동료이메일`을 입력하고 'OOO님에게 할당' 상자를 체크하면, 상대방의 구글 할 일 목록(Tasks)에 즉시 등록되고 알림 메일이 전송됩니다."
+              }
+            ],
+            checklist: [
+              "우측 상단 연필 아이콘을 눌러 '제안 모드'로 변경해보았다.",
+              "문장의 일부를 수정하여 초록색 제안 상자가 생성되는 것을 확인했다.",
+              "댓글을 달 때 `+이메일`을 써서 '할 일 배정' 체크박스를 적용해보았다."
+            ]
+          },
+          {
+            id: "1-4",
+            lessonId: 1,
+            stepNumber: 4,
+            type: "step",
+            lessonTitle: "1교시: 함께 일하는 기초 환경과 스마트 문서 작성",
+            stepTitle: "Step 4. 버전 기록(작업 기록 되돌리기)으로 실수 복구",
+            badge: "안전한 실수 복구",
+            objective: "실수로 지워진 내용이나 과거 작성 시점을 타임머신을 타듯 깨끗하게 되돌리는 방법을 배웁니다.",
+            description: "구글 문서는 글자를 칠 때마다 실시간으로 자동 저장됩니다. `파일 > 버전 기록 > 현재 버전에 이름 지정`을 통해 중요한 시점(예: '초안 완성')에 이름을 붙여두면 언제든 과거 상태로 되돌릴 수 있습니다.",
+            table: {
+              title: "구글 문서 버전 기록 vs 일반 파일 저장 비교",
+              headers: ["비교 항목", "구글 문서 버전 기록", "일반 컴퓨터 파일 (보고서_최종_진짜최종.docx)"],
+              rows: [
+                ["저장 방식", "클라우드 파일 하나 안에 모든 시간대 기록 저장", "파일 이름만 바꿔서 컴퓨터에 수십 개로 복사됨"],
+                ["수정자 확인", "누가 어떤 글자를 고쳤는지 색깔별로 한눈에 확인", "누가 무엇을 수정했는지 알기 어려워 일일이 비교"],
+                ["되돌리기", "버튼 하나로 원하는 날짜·시간으로 즉시 복구", "어느 파일이 진짜 최신인지 헷갈려서 큰 혼란 발생"]
+              ]
+            },
+            callouts: [
+              {
+                type: "key",
+                title: "이름 붙인 기록만 모아보는 팁",
+                content: "버전 기록 창 오른쪽 위의 '이름이 지정된 버전만 표시' 스위치를 켜면 자잘한 자동 저장 내역은 숨겨지고, 내가 이름을 붙여둔 중요한 마일스톤 버전만 깔끔하게 찾아볼 수 있습니다."
+              }
+            ],
+            checklist: [
+              "`파일 > 버전 기록 > 현재 버전에 이름 지정`을 눌러 '초안 완료' 이름을 붙였다.",
+              "`파일 > 버전 기록 보기`를 열어 시간대별 수정 내역과 참여자 색상을 확인했다.",
+              "과거 기록에서 '이 버전 복원하기' 버튼의 위치를 확인했다."
+            ]
+          },
+          {
+            id: "1-check",
+            lessonId: 1,
+            stepNumber: 5,
+            type: "checkpoint",
+            lessonTitle: "1교시: 함께 일하는 기초 환경과 스마트 문서 작성",
+            stepTitle: "1교시 실습 완료 체크포인트",
+            badge: "이해 완료 점검",
+            objective: "1교시에서 실습한 모든 내용을 성공적으로 마쳤는지 스스로 점검합니다.",
+            description: "아래 항목을 하나씩 확인하며 체크해보세요. 모든 항목을 달성하면 1교시 실습이 완벽히 끝납니다!",
+            checklist: [
+              "구글 드라이브에 프로젝트 전용 공유 폴더를 규칙에 맞게 만들었다.",
+              "편집자, 댓글 작성자, 뷰어의 역할 차이를 이해하고 안전 설정을 확인했다.",
+              "구글 문서에서 @ 스마트 칩으로 사람, 날짜, 드롭다운을 작성했다.",
+              "제안 모드를 활용해 본문 훼손 없이 수정 의견을 등록해보았다.",
+              "+멘션으로 동료에게 실시간 할 일(업무)을 배정해보았다.",
+              "버전 기록에 핵심 단계 이름을 붙이고 과거 시점으로 되돌리는 방법을 익혔다."
+            ]
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "2교시: 구글 폼과 시트의 실시간 자동 연결 흐름",
+        shortTitle: "2교시 설문지 & 자동 데이터 수집",
+        icon: "fa-list-check",
+        steps: [
+          {
+            id: "2-1",
+            lessonId: 2,
+            stepNumber: 1,
+            type: "step",
+            lessonTitle: "2교시: 구글 폼과 시트의 실시간 자동 연결 흐름",
+            stepTitle: "Step 1. 설문지 생성 및 기본 응답 설정",
+            badge: "자동 연결 기초",
+            objective: "중복 제출을 막고 신뢰할 수 있는 설문지 기본 환경을 설정합니다.",
+            description: "새 설문지를 만들고, 제목을 `[참가신청] 2026 청년 네트워킹 데이`로 정합니다. 설정 탭에서 이메일 수집 방식과 응답 사본 발송 옵션을 켜서 신청자가 안심하고 접수할 수 있도록 만듭니다.",
+            table: {
+              title: "설문지 핵심 응답 설정 안내표",
+              headers: ["설정 항목", "권장 선택값", "이렇게 설정하는 이유"],
+              rows: [
+                ["이메일 주소 수집", "‘확인됨’ 또는 ‘응답자 입력’", "행사 전 안내 이메일을 자동으로 보내기 위한 필수 기준 값"],
+                ["응답 사본 전송", "‘항상’ 또는 ‘요청한 경우’", "신청자 본인에게 접수증 영수증 메일을 보내주어 확인 문의 방지"],
+                ["1회로 응답 제한", "켜기 (구글 로그인 시)", "한 사람이 여러 번 중복으로 신청하여 인원이 꼬이는 것 방지"],
+                ["응답 수정 허용", "상황에 따라 켜기 (실습 권장)", "신청자가 나중에 세션을 바꾸고 싶을 때 스스로 수정 가능"]
+              ]
+            },
+            callouts: [
+              {
+                type: "tip",
+                title: "이메일 수집 옵션 쉽게 고르기",
+                content: "'확인됨'은 로그인된 구글 계정 이메일을 자동으로 가져와 가장 오타가 없으며, 비구글 사용자도 신청해야 한다면 '응답자 입력'을 선택하세요."
+              }
+            ],
+            checklist: [
+              "`[참가신청] 2026 청년 네트워킹 데이` 제목의 새 설문지를 만들었다.",
+              "설정 > 응답 탭에서 이메일 수집 방식을 확인하고 지정했다.",
+              "신청자 본인에게 사본을 보내주는 옵션을 켰다."
+            ]
+          },
+          {
+            id: "2-2",
+            lessonId: 2,
+            stepNumber: 2,
+            type: "step",
+            lessonTitle: "2교시: 구글 폼과 시트의 실시간 자동 연결 흐름",
+            stepTitle: "Step 2. 전화번호 입력 규칙 검사(정규식) 설정",
+            badge: "오타 방지와 깨끗한 데이터",
+            objective: "신청자가 하이픈(-)을 넣거나 숫자를 덜 입력하는 실수를 사전에 막아주는 규칙을 적용합니다.",
+            description: "이름(단답형, 필수)과 휴대전화 번호 질문을 만듭니다. 전화번호 질문에는 글자 규칙 검사(정규식)를 걸어 하이픈 없이 10~11자리 숫자만 정확하게 입력되도록 제한합니다.",
+            table: {
+              title: "전화번호 입력 규칙 검사 설정값",
+              headers: ["구분", "설정 항목", "실제 입력할 값"],
+              rows: [
+                ["질문 유형", "단답형 질문", "휴대전화 번호 ('-' 없이 숫자만 입력)"],
+                ["규칙 검사 조건", "정규식 > 일치", "^01[0-9]{8,9}$"],
+                ["맞춤 오류 안내 문구", "잘못 썼을 때 뜰 경고글", "'-' 없이 올바른 10~11자리 휴대폰 번호를 입력해주세요."]
+              ]
+            },
+            interactiveWidget: "regex",
+            callouts: [
+              {
+                type: "key",
+                title: "규칙 기호(^01[0-9]{8,9}$) 뜻 쉽게 풀기",
+                content: "`^01`은 01로 시작한다는 뜻이고, `[0-9]{8,9}`는 그 뒤에 숫자(0부터 9)가 8자리 또는 9자리가 오며, `$`는 거기서 끝난다는 뜻입니다. (총 10~11자리 휴대폰 번호만 통과)"
+              }
+            ],
+            checklist: [
+              "‘이름’ 질문을 단답형, 필수(꼭 작성)로 만들었다.",
+              "‘휴대전화 번호’ 질문 우측 하단 점 3개 메뉴 > '응답 확인'을 켰다.",
+              "정규식 > 일치 조건을 고르고 `^01[0-9]{8,9}$` 규칙을 입력했다.",
+              "잘못 입력했을 때 나타날 맞춤 오류 문구를 입력했다."
+            ]
+          },
+          {
+            id: "2-3",
+            lessonId: 2,
+            stepNumber: 3,
+            type: "step",
+            lessonTitle: "2교시: 구글 폼과 시트의 실시간 자동 연결 흐름",
+            stepTitle: "Step 3. 답변에 따라 다른 질문 보여주기 (조건 분기)",
+            badge: "스마트 맞춤 설문",
+            objective: "참가자의 역할(일반 참가자 vs 발표자)에 따라 서로 다른 질문 화면으로 건너뛰는 경로를 만듭니다.",
+            description: "참가 유형에 따라 필요한 질문이 다릅니다. 객관식 질문에서 '답변을 기준으로 섹션으로 이동' 옵션을 사용하면, 일반 참가자에게는 세션 선택을, 발표자에게는 발표 정보 입력 화면을 맞춤으로 보여줄 수 있습니다.",
+            table: {
+              title: "설문지 화면 이동 경로 설계표",
+              headers: ["화면(섹션)", "화면 이름", "질문 내용", "다음에 이동할 곳"],
+              rows: [
+                ["1번 화면", "기본 정보", "이름, 전화번호, 참가 유형(객관식)", "선택한 답변에 따라 분기 이동"],
+                ["2번 화면", "일반 참가자 전용", "듣고 싶은 세션(A: AI 도구 / B: 커리어)", "‘설문지 제출’로 바로 이동"],
+                ["3번 화면", "발표자 전용", "발표 주제명, 슬라이드 링크", "‘설문지 제출’로 바로 이동"]
+              ]
+            },
+            callouts: [
+              {
+                type: "warning",
+                title: "가장 흔한 실수 주의 (2번 화면 끝)",
+                content: "2번 화면 아래의 기본값이 '다음 섹션으로 이동'으로 되어 있으면, 일반 참가자가 3번 화면(발표자 정보)까지 보게 됩니다! 반드시 ‘설문지 제출’로 변경해주어야 깔끔하게 끝납니다."
+              }
+            ],
+            checklist: [
+              "우측 도구 막대의 '섹션 추가(=)'를 눌러 2번과 3번 화면을 만들었다.",
+              "참가 유형 질문 우측 하단 점 3개 > '답변을 기준으로 섹션으로 이동'을 켰다.",
+              "‘일반 참가자’는 2번 화면으로, ‘발표자’는 3번 화면으로 가도록 연결했다.",
+              "2번 화면 아래 이동 옵션을 ‘설문지 제출’로 명확히 선택했다."
+            ]
+          },
+          {
+            id: "2-4",
+            lessonId: 2,
+            stepNumber: 4,
+            type: "step",
+            lessonTitle: "2교시: 구글 폼과 시트의 실시간 자동 연결 흐름",
+            stepTitle: "Step 4. 구글 시트 실시간 연결 및 제출 테스트",
+            badge: "실시간 자동 연결 가동",
+            objective: "설문지 응답이 제출되는 즉시 구글 스프레드시트에 새 행으로 저절로 쌓이는 자동 연결을 확인합니다.",
+            description: "설문지 '응답' 탭에서 녹색 스프레드시트 아이콘('Sheets에 연결')을 누르면 전용 시트가 자동으로 만들어집니다. 상단의 눈 모양(미리보기) 아이콘을 눌러 직접 2건 이상 테스트 제출을 해보며 시트에 실시간으로 데이터가 들어오는지 확인합니다.",
+            table: {
+              title: "스프레드시트에 저절로 생기는 열(Column) 구조",
+              headers: ["열 번호", "항목 이름", "저장되는 내용", "설명"],
+              rows: [
+                ["A열", "타임스탬프 (작성 일시)", "응답이 접수된 날짜와 시간", "구글 시스템이 자동으로 기록 (수정 금지)"],
+                ["B열", "이메일 주소", "신청자의 이메일 주소", "이메일 수집 설정 시 자동 생성"],
+                ["C열", "이름", "신청자 이름", "단답형 필수 답변"],
+                ["D열", "휴대전화 번호", "규칙 검사를 거친 깨끗한 번호", "하이픈 없는 10~11자리 숫자"],
+                ["E열~", "참가 유형 / 세션 등", "참가자가 고른 답변 내용", "해당하지 않는 질문은 빈칸으로 정리됨"]
+              ]
+            },
+            callouts: [
+              {
+                type: "tip",
+                title: "시트 이름 확인하기",
+                content: "연결할 때 자동으로 만들어지는 시트 아래쪽 탭 이름은 `설문지 응답 1`입니다. 다음 3교시에서 이 탭 이름을 `Raw_Data`(원본 데이터)로 바꾸어 안전하게 관리합니다."
+              }
+            ],
+            checklist: [
+              "설문지 '응답' 탭에서 'Sheets에 연결'을 눌러 새 스프레드시트를 만들었다.",
+              "상단 눈 모양(미리보기)을 눌러 일반 참가자로 1건 테스트 제출했다.",
+              "발표자 유형으로도 1건 더 테스트 제출해보았다.",
+              "연결된 스프레드시트에 날짜·시간과 함께 데이터가 실시간으로 쌓이는 것을 확인했다."
+            ]
+          },
+          {
+            id: "2-check",
+            lessonId: 2,
+            stepNumber: 5,
+            type: "checkpoint",
+            lessonTitle: "2교시: 구글 폼과 시트의 실시간 자동 연결 흐름",
+            stepTitle: "2교시 실습 완료 체크포인트",
+            badge: "이해 완료 점검",
+            objective: "2교시 데이터 수집 및 자동 연결 과정을 성공적으로 완수했는지 점검합니다.",
+            description: "오류 없는 자동 접수 체계가 잘 구축되었는지 아래 항목을 체크하세요.",
+            checklist: [
+              "설문지 기본 응답 설정(이메일 수집, 접수 확인 사본 발송)을 마쳤다.",
+              "전화번호 입력 규칙 검사(`^01[0-9]{8,9}$`)를 성공적으로 적용했다.",
+              "참가 유형별 조건 분기를 설정하고 2번 화면 후 제출 처리를 완료했다.",
+              "미리보기로 2개 이상의 유형별 테스트 답변을 직접 제출해보았다.",
+              "구글 스프레드시트에 실시간으로 데이터가 바로바로 들어오는 것을 확인했다."
+            ]
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "3교시: 데이터 정리와 실시간 운영 현황판 만들기",
+        shortTitle: "3교시 시트 가공 & 대시보드",
+        icon: "fa-table-cells",
+        steps: [
+          {
+            id: "3-1",
+            lessonId: 3,
+            stepNumber: 1,
+            type: "step",
+            lessonTitle: "3교시: 데이터 정리와 실시간 운영 현황판 만들기",
+            stepTitle: "Step 1. 원본 데이터 보호를 위한 시트 탭 분리",
+            badge: "안전한 데이터 보존 원칙",
+            objective: "설문 응답이 계속 들어오는 원본 시트와 스태프가 출석을 체크하는 현황판 시트를 안전하게 나눕니다.",
+            description: "실무에서 가장 흔한 사고는 설문 응답 시트에 직접 글씨를 쓰거나 수식을 덮어써서 자동 연결이 꼬이는 것입니다. `Raw_Data`(원본 보존용)와 `대시보드`(현황판용) 탭으로 철저하게 분리해 작업합니다.",
+            table: {
+              title: "시트 탭 역할 분담 및 안전 원칙",
+              headers: ["시트 탭 이름", "담당하는 역할", "작업 시 지켜야 할 약속", "추천 안전 조치"],
+              rows: [
+                ["Raw_Data (원본)", "설문지에서 들어오는 순수한 응답 데이터가 쌓이는 곳", "손으로 글자를 고치거나 열을 마음대로 지우지 않기", "시트 보호(잠금) 설정"],
+                ["대시보드 (현황판)", "통계 계산, 세션별 명단 분리, 출석 체크박스 운영", "수식을 활용해 자유롭게 꾸미고 관리하기", "현장 스태프와 공유"]
+              ]
+            },
+            callouts: [
+              {
+                type: "warning",
+                title: "절대 주의할 점",
+                content: "`Raw_Data` 시트의 빈칸에 손으로 메모를 쓰지 마세요. 새 응답이 들어올 때 한 줄씩 밀어 넣는 방식으로 기록되므로 손으로 쓴 내용과 엇갈릴 수 있습니다."
+              }
+            ],
+            checklist: [
+              "2교시에서 만들어진 스프레드시트 탭 이름을 `Raw_Data`로 바꿨다.",
+              "아래쪽 `+` 버튼을 눌러 새 탭을 만들고 이름을 `대시보드`로 지정했다.",
+              "`Raw_Data` 탭 우클릭 > '시트 보호' 기능을 확인했다."
+            ]
+          },
+          {
+            id: "3-2",
+            lessonId: 3,
+            stepNumber: 2,
+            type: "step",
+            lessonTitle: "3교시: 데이터 정리와 실시간 운영 현황판 만들기",
+            stepTitle: "Step 2. 출석 체크박스와 전화번호 하이픈 자동 변환",
+            badge: "데이터 자동 다듬기",
+            objective: "클릭할 수 있는 체크박스를 넣고, 숫자만 있던 전화번호에 자동으로 하이픈(-)을 붙여줍니다.",
+            description: "현장 출석 확인용 체크박스를 넣고, 앞서 숫자만 입력받았던 전화번호(`01012345678`)를 보기 좋게 `010-1234-5678`로 자동 변환하는 글자 치환 수식을 작성합니다.",
+            codeBlock: {
+              language: "excel-formula",
+              title: "전화번호 하이픈(-) 자동 붙이기 수식 (H열 등에 입력)",
+              code: '=REGEXREPLACE(TO_TEXT(C2), "(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3")',
+              explanation: "TO_TEXT(C2)로 숫자를 글자로 바꾼 뒤, 3자리-4자리-4자리 숫자 묶음($1-$2-$3) 사이에 하이픈을 쏙쏙 넣어줍니다."
+            },
+            callouts: [
+              {
+                type: "tip",
+                title: "체크박스 만드는 쉬운 방법",
+                content: "출석 여부를 표시할 셀들을 마우스로 드래그한 다음 상단 메뉴 `삽입 > 체크박스`를 누르면 즉시 클릭할 수 있는 깔끔한 네모 체크박스가 생깁니다."
+              }
+            ],
+            checklist: [
+              "대시보드 시트 G열에 `삽입 > 체크박스`로 출석 체크박스를 만들었다.",
+              "H열에 `=REGEXREPLACE(...)` 수식을 넣어 하이픈이 들어간 번호가 나오게 했다.",
+              "체크박스를 누르면 수식 입력줄에 TRUE/FALSE가 바뀌는 것을 확인했다."
+            ]
+          },
+          {
+            id: "3-3",
+            lessonId: 3,
+            stepNumber: 3,
+            type: "step",
+            lessonTitle: "3교시: 데이터 정리와 실시간 운영 현황판 만들기",
+            stepTitle: "Step 3. 수식 하나로 명단이 저절로 늘어나는 FILTER 함수",
+            badge: "스마트 자동 추출",
+            objective: "복사해서 붙여넣을 필요 없이, 새 응답이 들어오면 저절로 명단이 갱신되는 FILTER 수식을 적용합니다.",
+            description: "`대시보드` 시트에 `FILTER` 함수를 단 한 번만 쓰면, 원본 데이터에서 '일반 참가자'인 사람만 쏙 뽑아옵니다. 새로운 참가자가 신청하면 수식을 다시 쓸 필요 없이 명단 표가 아래로 저절로 늘어납니다.",
+            codeBlock: {
+              language: "excel-formula",
+              title: "일반 참가자 명단 자동 추출 FILTER 수식",
+              code: '=FILTER({Raw_Data!B2:B, Raw_Data!H2:H, Raw_Data!E2:E, Raw_Data!G2:G}, Raw_Data!D2:D = "일반 참가자")',
+              explanation: "{배열} 기호로 가져오고 싶은 열(이메일, 변환된전화번호, 세션, 출석체크)을 묶고, 참가 유형이 '일반 참가자'인 줄만 실시간으로 추출합니다."
+            },
+            interactiveWidget: "filter",
+            callouts: [
+              {
+                type: "key",
+                title: "수식이 스스로 펼쳐지는 원리 (자동 확장)",
+                content: "FILTER 수식은 첫 번째 셀(예: A4) 한 군데에만 넣으면 결과 크기만큼 아래와 오른쪽으로 저절로 펼쳐집니다. 펼쳐질 자리에 다른 글자가 적혀 있으면 `#REF!` 오류가 나므로 자리를 비워두세요."
+              }
+            ],
+            checklist: [
+              "대시보드 시트 특정 셀에 FILTER 수식을 입력했다.",
+              "수식 1개 입력만으로 여러 행과 열이 저절로 채워지는 것을 확인했다.",
+              "Raw_Data에 새 응답이 들어왔을 때 필터 결과에도 바로 반영되는지 확인했다."
+            ]
+          },
+          {
+            id: "3-4",
+            lessonId: 3,
+            stepNumber: 4,
+            type: "step",
+            lessonTitle: "3교시: 데이터 정리와 실시간 운영 현황판 만들기",
+            stepTitle: "Step 4. 실시간 통계 요약과 출석 강조 조건부 서식",
+            badge: "운영 현황판 완성",
+            objective: "접수 인원과 출석 인원을 자동으로 세고, 출석 체크 시 줄 전체가 연초록색으로 바뀌게 만듭니다.",
+            description: "`COUNTA`와 `COUNTIF` 수식으로 총 신청자, 출석자 수, 출석률을 실시간 계산하고, 출석 체크박스를 누르면 해당 줄 전체가 연초록색으로 강조되는 조건부 서식을 세팅합니다.",
+            table: {
+              title: "현황판 핵심 통계 수식 정리표",
+              headers: ["지표 이름", "수식 예시", "어떤 역할을 하나요?"],
+              rows: [
+                ["총 신청자 수", "=COUNTA(Raw_Data!B2:B)", "이메일 열에 입력된 글자 개수를 세어 총 인원 파악"],
+                ["현장 출석 인원", "=COUNTIF(Raw_Data!G2:G, TRUE)", "출석 체크박스가 체크된(TRUE) 개수만 세기"],
+                ["현장 출석률 (%)", "=B2 / B1 (서식: %)", "출석 인원 / 총 신청자 비율 계산"],
+                ["자동 색상 강조 수식", "=$G4=TRUE", "G열의 체크박스가 켜지면 줄 전체에 색상 입히기 ($로 열 고정)"]
+              ]
+            },
+            callouts: [
+              {
+                type: "warning",
+                title: "조건부 서식에서 가장 중요한 $ 기호",
+                content: "범위를 A4:G50으로 잡았을 때, 맞춤 수식에 반드시 `=$G4=TRUE` 처럼 G열 문자 앞에 `$`(달러 기호)를 붙여야 줄 전체의 색상이 통째로 예쁘게 바뀝니다!"
+              }
+            ],
+            checklist: [
+              "COUNTA와 COUNTIF 수식으로 신청자/출석자 요약 카드를 만들었다.",
+              "명단 범위(A4:G50)를 선택하고 `서식 > 조건부 서식`을 열었다.",
+              "맞춤 수식에 `=$G4=TRUE`를 넣고 배경색을 연초록색으로 지정했다.",
+              "체크박스를 누르면 해당 줄 전체 색상이 실시간으로 바뀌는지 확인했다."
+            ]
+          },
+          {
+            id: "3-check",
+            lessonId: 3,
+            stepNumber: 5,
+            type: "checkpoint",
+            lessonTitle: "3교시: 데이터 정리와 실시간 운영 현황판 만들기",
+            stepTitle: "3교시 실습 완료 체크포인트",
+            badge: "이해 완료 점검",
+            objective: "3교시 스프레드시트 데이터 정리 및 운영 현황판 구축 역량을 점검합니다.",
+            description: "실시간 운영 현황판이 완벽하게 준비되었는지 확인해보세요.",
+            checklist: [
+              "Raw_Data 시트와 대시보드 시트를 나누어 원본 데이터를 안전하게 지켰다.",
+              "체크박스를 만들고 REGEXREPLACE로 전화번호 하이픈 자동 변환을 적용했다.",
+              "FILTER 수식으로 세션별 명단을 자동으로 깔끔하게 뽑아냈다.",
+              "COUNTA, COUNTIF 수식으로 핵심 통계 숫자를 실시간 집계했다.",
+              "맞춤 수식 `=$열=TRUE`를 이용해 출석 시 한 줄 전체가 강조되는 서식을 완성했다."
+            ]
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "4교시: 실시간 발표자료 연동과 Apps Script 첫 자동화",
+        shortTitle: "4교시 슬라이드 연동 & Apps Script",
+        icon: "fa-bolt-lightning",
+        steps: [
+          {
+            id: "4-1",
+            lessonId: 4,
+            stepNumber: 1,
+            type: "step",
+            lessonTitle: "4교시: 실시간 발표자료 연동과 Apps Script 첫 자동화",
+            stepTitle: "Step 1. 시트 차트 생성 및 구글 슬라이드 실시간 연동",
+            badge: "보고서 자동 동기화",
+            objective: "데이터가 바뀌면 프레젠테이션 보고서의 차트도 [업데이트] 버튼 하나로 즉시 새로고침되는 연결 기능을 배웁니다.",
+            description: "구글 시트에서 참가자 통계 차트를 만듭니다. 구글 슬라이드(Google Slides)에 차트를 복사해 붙여넣을 때 '스프레드시트에 연결'을 고르면, 시트의 숫자가 바뀌어도 슬라이드에서 [업데이트] 버튼만 누르면 최신 차트로 자동 갱신됩니다.",
+            table: {
+              title: "차트 붙여넣기 2가지 방식 비교",
+              headers: ["선택 옵션", "어떻게 작동하나요?", "장단점", "추천 상황"],
+              rows: [
+                ["스프레드시트에 연결 (권장)", "원본 시트와 슬라이드가 계속 연결되어 있음", "시트 값이 바뀌면 슬라이드에서 [업데이트] 클릭 한 번으로 최신화", "매주/매달 발표하는 정기 보고서, 실시간 현황 브리핑"],
+                ["연결 해제하여 붙여넣기", "복사한 순간의 정지 이미지 사진으로 붙음", "원본 시트가 바뀌어도 슬라이드 차트는 과거 모양 그대로 유지", "과거 특정 날짜의 감사 자료, 외부 공유용 고정 자료"]
+              ]
+            },
+            callouts: [
+              {
+                type: "tip",
+                title: "직접 확인해보는 팁",
+                content: "시트에서 신청자 숫자를 일부러 바꿔보세요. 슬라이드 화면 상단에 검은색 `[업데이트]` 버튼이 즉시 나타나 클릭할 수 있게 됩니다!"
+              }
+            ],
+            checklist: [
+              "대시보드 통계 범위를 잡고 `삽입 > 차트`로 세션 분포 차트를 만들었다.",
+              "차트를 `Ctrl+C`로 복사한 후 구글 슬라이드에 `Ctrl+V`로 붙여넣었다.",
+              "붙여넣기 창에서 '스프레드시트에 연결'을 선택했다.",
+              "시트 숫자를 바꾼 뒤 슬라이드 차트 우측 상단 [업데이트]를 눌러 최신 반영을 확인했다."
+            ]
+          },
+          {
+            id: "4-2",
+            lessonId: 4,
+            stepNumber: 2,
+            type: "step",
+            lessonTitle: "4교시: 실시간 발표자료 연동과 Apps Script 첫 자동화",
+            stepTitle: "Step 2. 단순 반복 수작업의 한계 느끼기 (불편한 점)",
+            badge: "왜 자동화가 필요할까요?",
+            objective: "수백 명에게 일일이 개인 맞춤 이메일을 복사-붙여넣기 할 때 생기는 극심한 시간 낭비와 실수를 체감합니다.",
+            description: "행사 당일, 신청자 100명에게 'OOO님, 신청하신 [세션명] 입장 안내드립니다'라는 메일을 한 명씩 손으로 복사해 보낸다고 생각해보세요. 이름이 뒤바뀌는 실수, 100명 x 2분 = 200분 이상의 엄청난 시간 낭비, 실수로 누락되는 사고가 일어납니다.",
+            table: {
+              title: "사람 손으로 복사 발송 vs 스크립트 원클릭 자동 발송 비교",
+              headers: ["비교 항목", "손으로 하나씩 복사해 보내기", "스크립트 원클릭 자동 발송"],
+              rows: [
+                ["100명 발송 소요 시간", "약 150분 ~ 200분 (손가락 피로와 야근)", "약 5초 ~ 10초 (클릭 한 번)"],
+                ["개인 맞춤 실수율", "이름과 세션이 뒤바뀌는 실수 자주 발생", "0% (시트에 적힌 정보 그대로 정확히 발송)"],
+                ["보냈는지 확인하기", "누구까지 보냈는지 일일이 체크해야 함", "시트에 '발송 완료' 날짜와 시간을 자동 기록 가능"],
+                ["담당자의 일", "단순 반복 노동으로 인한 피로", "더 중요한 행사 기획과 손님 맞이에 집중 가능"]
+              ]
+            },
+            callouts: [
+              {
+                type: "key",
+                title: "스마트 워크의 진짜 목적",
+                content: "단순 복사-붙여넣기 같은 지루한 일은 컴퓨터에게 맡기고, 사람은 창의적인 아이디어를 내고 사람들과 소통하는 데 집중하는 것이 진정한 스마트 워크입니다."
+              }
+            ],
+            checklist: [
+              "대량 맞춤 메일을 손으로 보낼 때 발생하는 문제점(시간 낭비, 실수, 피로)을 이해했다.",
+              "스프레드시트 데이터를 바탕으로 한 원클릭 자동 발송의 필요성을 공감했다."
+            ]
+          },
+          {
+            id: "4-3",
+            lessonId: 4,
+            stepNumber: 3,
+            type: "step",
+            lessonTitle: "4교시: 실시간 발표자료 연동과 Apps Script 첫 자동화",
+            stepTitle: "Step 3. Apps Script 에디터 열고 첫 자동화 코드 작성",
+            badge: "첫 번째 자동화 코딩",
+            objective: "별도 프로그램 설치 없이 웹 브라우저에서 바로 15줄의 코드를 넣어 지메일 자동 발송을 만듭니다.",
+            description: "구글 시트 상단 메뉴 `확장 프로그램 > Apps Script`를 누르면 내 브라우저 안에 코딩 창이 바로 열립니다. 시트에 모인 신청자 명단을 한 줄씩 읽어서 지메일(`GmailApp`)로 맞춤 메일을 쏘아주는 15줄 코드를 입력합니다.",
+            codeBlock: {
+              language: "javascript",
+              title: "참가자 개인 맞춤 안내 메일 자동 발송 코드 (sendNotificationEmails.gs)",
+              code: `function sendNotificationEmails() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Raw_Data");
+  const data = sheet.getDataRange().getValues(); // 시트 전체 데이터 읽기
+
+  // 1행(제목줄)을 건너뛰고 2행(i=1)부터 한 사람씩 반복 실행
+  for (let i = 1; i < data.length; i++) {
+    const email = data[i][1];    // B열: 이메일
+    const name = data[i][2];     // C열: 이름
+    const session = data[i][4];  // E열: 참가 세션
+
+    if (!email) continue; // 이메일 칸이 비어있으면 건너뛰기
+
+    const subject = \`[안내] \${name}님, 2026 청년 네트워킹 데이 신청이 완료되었습니다.\`;
+    const body = \`안녕하세요, \${name}님!\\n\\n신청하신 [\${session}] 세션의 접수가 성공적으로 확인되었습니다.\\n행사 당일 뵙겠습니다!\\n\\n- 행사 운영팀 드림 -\`;
+
+    GmailApp.sendEmail(email, subject, body); // 실제 지메일 자동 발송!
+  }
+}`,
+              explanation: "시트의 데이터를 읽어온 뒤, for 반복문으로 참가자 한 명 한 명에게 각자의 이름(${name})과 세션(${session})을 넣어 메일을 보냅니다."
+            },
+            interactiveWidget: "mailpreview",
+            callouts: [
+              {
+                type: "tip",
+                title: "백틱(`)과 ${이름} 쉽게 이해하기",
+                content: "키보드 물결표 아래에 있는 백틱(`) 기호로 문장을 감싸고 `${변수}`를 넣으면, 글자 사이에 신청자의 이름을 아주 쉽게 끼워 넣을 수 있습니다."
+              }
+            ],
+            checklist: [
+              "구글 시트에서 `확장 프로그램 > Apps Script`를 눌러 편집기 창을 열었다.",
+              "프로젝트 이름을 `[TF] 행사 안내 자동 발송`으로 바꿨다.",
+              "위 15줄 코드를 [코드 복사] 버튼으로 복사해 `Code.gs`에 붙여넣었다.",
+              "상단 디스크 모양 저장 아이콘(Ctrl+S)을 눌러 저장했다."
+            ]
+          },
+          {
+            id: "4-4",
+            lessonId: 4,
+            stepNumber: 4,
+            type: "step",
+            lessonTitle: "4교시: 실시간 발표자료 연동과 Apps Script 첫 자동화",
+            stepTitle: "Step 4. 구글 계정 보안 사용 승인 및 원클릭 발송 테스트",
+            badge: "첫 실행과 결과 확인",
+            objective: "처음 실행할 때 나타나는 구글 계정 사용 허가 승인을 안전하게 완료하고, 실제 지메일이 발송되는 것을 확인합니다.",
+            description: "상단 실행 함수를 `sendNotificationEmails`로 고르고 `[실행]`을 누르면 첫 실행 시 구글 계정 사용 권한 확인 창이 뜹니다. 내가 직접 작성한 안전한 코드이므로 [고급 > ...으로 이동 > 허용] 순서대로 통과합니다.",
+            table: {
+              title: "구글 계정 사용 승인 5단계 안내",
+              headers: ["단계", "화면에 뜨는 문구", "내가 클릭할 버튼", "어떤 의미인가요?"],
+              rows: [
+                ["1단계", "‘권한 검토’ 팝업창", "[권한 검토] 클릭", "이 코드가 내 지메일과 시트를 사용한다는 안내"],
+                ["2단계", "구글 계정 선택", "내 구글 계정 클릭", "어떤 계정의 이메일로 메일을 보낼지 선택"],
+                ["3단계", "‘Google에서 확인하지 않은 앱’", "좌측 하단 [고급] 클릭", "외부 상점에 정식 판매 등록된 앱이 아닌, 내가 직접 짠 개인 코드라는 뜻"],
+                ["4단계", "‘... (안전하지 않음)으로 이동’", "[...으로 이동] 클릭", "내가 직접 확인한 안전한 코드이므로 계속 진행한다는 뜻"],
+                ["5단계", "접근 권한 허용", "[허용] 클릭", "승인이 끝나며 코드가 실행되고 메일이 전송됨"]
+              ]
+            },
+            callouts: [
+              {
+                type: "warning",
+                title: "'안전하지 않음' 경고가 뜨는 이유",
+                content: "구글이 전 세계 상점에 공식 등록되지 않은 개인 작성 코드에는 모두 이 문구를 띄웁니다. 여러분이 방금 직접 작성한 안전한 코드이므로 안심하고 [고급]을 눌러 통과하시면 됩니다."
+              },
+              {
+                type: "key",
+                title: "발송 확인하기",
+                content: "실행이 끝나면 내 Gmail에 접속해 `보낸편지함`을 열어보세요. 시트에 적어둔 테스트 참가자(내 이메일)에게 개인 맞춤 메일이 깔끔하게 보내진 것을 바로 확인할 수 있습니다!"
+              }
+            ],
+            checklist: [
+              "Apps Script 상단 함수 목록에서 `sendNotificationEmails`가 선택되었는지 확인했다.",
+              "`[실행]` 버튼을 누르고 나타난 창에서 [권한 검토]를 눌렀다.",
+              "[고급 > ...으로 이동 > 허용] 순서로 계정 사용 승인을 마쳤다.",
+              "실행 로그에 '실행 완료'가 뜬 것을 확인하고, Gmail 보낸편지함에서 메일이 잘 도착했는지 확인했다."
+            ]
+          },
+          {
+            id: "4-check",
+            lessonId: 4,
+            stepNumber: 5,
+            type: "checkpoint",
+            lessonTitle: "4교시: 실시간 발표자료 연동과 Apps Script 첫 자동화",
+            stepTitle: "4교시 실습 완료 체크포인트",
+            badge: "이해 완료 점검",
+            objective: "4교시 시각화 차트 연동과 이메일 자동 발송 실습을 모두 마쳤는지 최종 점검합니다.",
+            description: "구글 워크스페이스의 전 과정을 하나로 잇는 자동화를 완성했습니다. 아래 항목을 체크해보세요!",
+            checklist: [
+              "구글 시트 차트를 구글 슬라이드에 '스프레드시트에 연결'로 넣었다.",
+              "시트 숫자가 바뀔 때 슬라이드 차트 [업데이트] 버튼으로 동기화됨을 확인했다.",
+              "Apps Script 편집기에 15줄 이메일 자동 발송 코드를 넣고 저장했다.",
+              "구글 보안 사용 승인(고급 > 이동 > 허용) 절차를 이해하고 안전하게 통과했다.",
+              "실제 지메일 보낸편지함에서 시트 데이터 기반 맞춤 메일이 자동 발송된 것을 확인했다."
+            ]
+          }
+        ]
+      }
+    ];
+
+    const ALL_SLIDES = LESSON_DATA.flatMap(l => l.steps);
+    let currentSlideIndex = 0;
+    let completedChecklist = {};
+    let openAccordionLessonId = 1;
+
+    try {
+      const savedChecks = localStorage.getItem('gws_guide_checklist');
+      if (savedChecks) completedChecklist = JSON.parse(savedChecks);
+      const savedIndex = localStorage.getItem('gws_guide_current_slide');
+      if (savedIndex !== null) {
+        const parsed = parseInt(savedIndex, 10);
+        if (!isNaN(parsed) && parsed >= 0 && parsed < ALL_SLIDES.length) {
+          currentSlideIndex = parsed;
+          openAccordionLessonId = ALL_SLIDES[currentSlideIndex].lessonId;
+        }
+      }
+    } catch (e) {
+      console.warn('localStorage not available', e);
+    }
+
+    function saveChecklist() {
+      try {
+        localStorage.setItem('gws_guide_checklist', JSON.stringify(completedChecklist));
+      } catch (e) {}
+    }
+
+    function saveSlideIndex() {
+      try {
+        localStorage.setItem('gws_guide_current_slide', currentSlideIndex.toString());
+      } catch (e) {}
+    }
+
+    function renderSidebar() {
+      const container = document.getElementById('accordion-container');
+      container.innerHTML = '';
+
+      LESSON_DATA.forEach(lesson => {
+        const isExpanded = openAccordionLessonId === lesson.id;
+        
+        let totalItems = 0;
+        let checkedItems = 0;
+        lesson.steps.forEach(st => {
+          st.checklist.forEach((_, idx) => {
+            totalItems++;
+            if (completedChecklist[`${st.id}-${idx}`]) checkedItems++;
+          });
+        });
+        const progress = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
+
+        const card = document.createElement('div');
+        card.className = "rounded-xl border border-slate-200/80 bg-slate-50/50 overflow-hidden";
+
+        card.innerHTML = `
+          <button type="button" class="lesson-header-btn flex w-full items-center justify-between p-3 text-left hover:bg-slate-100 transition-colors" data-lesson-id="${lesson.id}">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-white border border-slate-200 text-indigo-600 text-xs">
+                <i class="fa-solid ${lesson.icon}"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-900 truncate">${lesson.title.split(':')[0]}</div>
+                <div class="text-[11px] text-slate-500 truncate">${lesson.shortTitle}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              ${progress > 0 ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${progress === 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}">${progress}%</span>` : ''}
+              <i class="fa-solid ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'} text-xs text-slate-400"></i>
+            </div>
+          </button>
+        `;
+
+        if (isExpanded) {
+          const subList = document.createElement('div');
+          subList.className = "border-t border-slate-200/60 bg-white p-1.5 space-y-1";
+
+          lesson.steps.forEach(st => {
+            const currentStep = ALL_SLIDES[currentSlideIndex];
+            const isActive = currentStep.id === st.id;
+            const isCheckpoint = st.type === 'checkpoint';
+            
+            const stepChecks = st.checklist.map((_, i) => completedChecklist[`${st.id}-${i}`]);
+            const isAllDone = stepChecks.length > 0 && stepChecks.every(Boolean);
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition-all ${
+              isActive 
+                ? 'bg-indigo-50 font-bold text-indigo-700 ring-1 ring-indigo-200' 
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`;
+            btn.innerHTML = `
+              <div class="flex items-center gap-2 min-w-0">
+                <i class="fa-regular ${isAllDone ? 'fa-circle-check text-emerald-600' : 'fa-circle text-slate-300'} text-xs shrink-0"></i>
+                <span class="truncate">${isCheckpoint ? '🏁 ' + st.stepTitle : st.stepTitle.replace('Step ', 'S')}</span>
+              </div>
+              ${isActive ? '<span class="h-1.5 w-1.5 rounded-full bg-indigo-600 shrink-0"></span>' : ''}
+            `;
+
+            btn.onclick = () => {
+              const targetIdx = ALL_SLIDES.findIndex(s => s.id === st.id);
+              if (targetIdx !== -1) {
+                goToSlide(targetIdx);
+                closeSidebarOnMobile();
+              }
+            };
+            subList.appendChild(btn);
+          });
+          card.appendChild(subList);
+        }
+
+        container.appendChild(card);
+      });
+
+      document.querySelectorAll('.lesson-header-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const lId = parseInt(btn.getAttribute('data-lesson-id'), 10);
+          openAccordionLessonId = openAccordionLessonId === lId ? 0 : lId;
+          renderSidebar();
+        });
+      });
+    }
+
+    function renderSlide() {
+      const step = ALL_SLIDES[currentSlideIndex];
+      const container = document.getElementById('slide-card-container');
+      
+      document.getElementById('slide-counter').textContent = `${currentSlideIndex + 1} / ${ALL_SLIDES.length}`;
+      document.getElementById('breadcrumb-title').innerHTML = `
+        <span class="font-semibold text-indigo-700 whitespace-nowrap">${step.lessonTitle.split(':')[0]}</span>
+        <span class="text-slate-400">›</span>
+        <span class="text-slate-800 font-medium truncate">${step.stepTitle}</span>
+      `;
+
+      const prevBtns = [document.getElementById('header-prev-btn'), document.getElementById('footer-prev-btn')];
+      const nextBtns = [document.getElementById('header-next-btn'), document.getElementById('footer-next-btn')];
+
+      prevBtns.forEach(b => b.disabled = (currentSlideIndex === 0));
+      nextBtns.forEach(b => b.disabled = (currentSlideIndex === ALL_SLIDES.length - 1));
+
+      const totalChecks = step.checklist.length;
+      const checkedCount = step.checklist.filter((_, idx) => completedChecklist[`${step.id}-${idx}`]).length;
+      const isAllChecked = totalChecks > 0 && checkedCount === totalChecks;
+
+      let html = `
+        <div class="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-sm">
+          <div class="border-b border-slate-100 pb-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2 text-xs font-semibold text-indigo-700">
+                <span class="bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full">
+                  ${step.lessonTitle}
+                </span>
+                <span class="text-slate-400">/</span>
+                <span class="text-slate-600 font-medium">${step.badge}</span>
+              </div>
+              <div class="text-xs font-semibold text-slate-500">
+                달성도: <span class="${isAllChecked ? 'text-emerald-700' : 'text-indigo-600'} font-bold tabular-nums">${checkedCount} / ${totalChecks} 완료</span>
+              </div>
+            </div>
+
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">${step.stepTitle}</h2>
+
+            <div class="mt-4 flex items-start gap-3 rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs sm:text-sm text-slate-700">
+              <i class="fa-solid fa-bullseye text-indigo-600 text-base mt-0.5"></i>
+              <div>
+                <span class="font-bold text-slate-900 block mb-0.5">실습 목표</span>
+                <span>${step.objective}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 space-y-6 text-sm text-slate-700 leading-relaxed">
+            <p class="text-base text-slate-800 leading-relaxed">${step.description}</p>
+      `;
+
+      if (step.interactiveWidget === 'smartchip') {
+        html += `
+          <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/60 to-white p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                <span class="flex h-5 w-5 items-center justify-center rounded bg-indigo-600 text-white font-mono text-[11px]">@</span>
+                스마트 칩 실시간 클릭 체험기
+              </span>
+              <span class="text-xs text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded-full font-medium">체험 모드</span>
+            </div>
+            <p class="text-xs text-slate-600">구글 문서에서 @ 입력 시 생기는 스마트 칩입니다. 버튼을 눌러 상태를 바꿔보세요:</p>
+            <div class="rounded-lg border border-slate-200 bg-white p-3 space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-500">진행 상태:</span>
+                <button id="chip-status-btn" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold bg-amber-100 text-amber-800 border-amber-300 transition-all cursor-pointer">
+                  <i class="fa-solid fa-tag text-[10px]"></i>
+                  <span id="chip-status-text">진행중 (클릭시 변경)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (step.interactiveWidget === 'regex') {
+        html += `
+          <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
+                전화번호 입력 규칙 검사 실시간 테스터
+              </h4>
+              <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">^01[0-9]{8,9}$</span>
+            </div>
+            <div>
+              <input id="regex-input" type="text" value="01012345678" class="w-full rounded-lg border border-emerald-400 bg-emerald-50/20 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <div id="regex-feedback" class="mt-2 text-xs text-emerald-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check"></i>
+                <span><strong>입력 규칙 통과!</strong> 올바른 10~11자리 휴대폰 번호입니다.</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (step.interactiveWidget === 'filter') {
+        html += `
+          <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-800">📊 저절로 늘어나는 FILTER 수식 체험기</h4>
+              <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">자동 확장 (SPILL)</span>
+            </div>
+            <p class="text-xs text-slate-600">수식: <code>=FILTER({Raw_Data!B2:B, Raw_Data!H2:H, Raw_Data!E2:E, Raw_Data!G2:G}, Raw_Data!D2:D = "일반 참가자")</code></p>
+            <div class="overflow-x-auto rounded border border-slate-200 text-xs">
+              <table class="w-full text-left">
+                <thead class="bg-slate-100 border-b">
+                  <tr><th class="p-2">이메일</th><th class="p-2">전화번호</th><th class="p-2">세션</th><th class="p-2">출석</th></tr>
+                </thead>
+                <tbody>
+                  <tr class="bg-emerald-50/60 font-medium border-b"><td class="p-2">kim@test.com</td><td class="p-2">010-9876-5432</td><td class="p-2">A: AI 도구</td><td class="p-2"><span class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px]">출석 완료</span></td></tr>
+                  <tr class="border-b"><td class="p-2">lee@test.com</td><td class="p-2">010-5555-6666</td><td class="p-2">B: 커리어 네트워킹</td><td class="p-2"><span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[10px]">미체크</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      } else if (step.interactiveWidget === 'mailpreview') {
+        html += `
+          <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+            <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-paper-plane text-indigo-600"></i>
+              Apps Script 개인 맞춤 메일 자동 발송 체험기
+            </h4>
+            <div class="rounded border border-slate-200 bg-slate-50 p-3 text-xs space-y-2">
+              <div class="border-b pb-1 font-mono text-indigo-700 font-semibold">To: minsu.kim@example.com</div>
+              <div class="border-b pb-1 font-semibold text-slate-900">제목: [안내] 김민수님, 2026 청년 네트워킹 데이 신청이 완료되었습니다.</div>
+              <div class="bg-white p-2.5 rounded border border-slate-200 text-slate-800">
+                안녕하세요, 김민수님!<br><br>신청하신 [A: AI 도구] 세션의 접수가 성공적으로 확인되었습니다.<br>행사 당일 뵙겠습니다!<br><br>- 행사 운영팀 드림 -
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (step.table) {
+        html += `
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold text-slate-800">📋 ${step.table.title}</h4>
+            <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+              <table class="w-full border-collapse text-left text-xs">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-800 font-semibold border-b border-slate-200">
+                    ${step.table.headers.map(h => `<th class="px-3.5 py-2.5 whitespace-nowrap">${h}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                  ${step.table.rows.map(r => `
+                    <tr class="hover:bg-slate-50/70 transition-colors">
+                      ${r.map((c, i) => `<td class="px-3.5 py-2.5 ${i === 0 ? 'font-semibold text-slate-900' : 'text-slate-600'}">${c}</td>`).join('')}
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      if (step.codeBlock) {
+        html += `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-800">💻 ${step.codeBlock.title}</span>
+              <span class="text-slate-500 font-mono">${step.codeBlock.language}</span>
+            </div>
+            <div class="relative overflow-hidden rounded-xl bg-slate-900 text-slate-100 border border-slate-800 shadow-md">
+              <div class="flex items-center justify-between border-b border-slate-800 bg-slate-950/70 px-4 py-2 text-xs">
+                <span class="font-mono text-slate-400">${step.codeBlock.language === 'javascript' ? 'AppsScript.gs' : 'Formula'}</span>
+                <button type="button" id="copy-code-btn" class="flex items-center gap-1.5 rounded bg-slate-800 hover:bg-slate-700 px-2.5 py-1 text-slate-200 font-medium transition-colors">
+                  <i class="fa-regular fa-copy text-xs"></i>
+                  <span>코드 복사</span>
+                </button>
+              </div>
+              <pre class="overflow-x-auto p-4 text-xs font-mono text-emerald-300 leading-relaxed"><code>${escapeHtml(step.codeBlock.code)}</code></pre>
+            </div>
+            ${step.codeBlock.explanation ? `<p class="text-xs text-slate-500">💡 <strong>해설:</strong> ${step.codeBlock.explanation}</p>` : ''}
+          </div>
+        `;
+      }
+
+      if (step.callouts) {
+        html += `<div class="space-y-3 pt-2">`;
+        step.callouts.forEach(c => {
+          let color = 'blue';
+          let icon = 'fa-lightbulb';
+          if (c.type === 'warning') { color = 'amber'; icon = 'fa-triangle-exclamation'; }
+          else if (c.type === 'key') { color = 'indigo'; icon = 'fa-key'; }
+
+          html += `
+            <div class="flex items-start gap-3 rounded-xl border border-${color}-200 bg-${color}-50/60 p-4 text-xs sm:text-sm">
+              <i class="fa-solid ${icon} text-${color}-600 text-base mt-0.5 shrink-0"></i>
+              <div class="space-y-1">
+                <span class="font-bold text-${color}-900 block">${c.title}</span>
+                <p class="text-slate-700 leading-relaxed">${c.content}</p>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      if (step.checklist && step.checklist.length > 0) {
+        html += `
+          <div class="mt-8 rounded-xl border border-slate-200 bg-slate-50/70 p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check text-indigo-600"></i>
+                ${step.type === 'checkpoint' ? '교시 실습 완료 점검 체크리스트' : '직접 따라 해보는 실습 체크리스트'}
+              </h4>
+              <span class="text-[11px] text-slate-500">클릭 시 자동 저장됩니다</span>
+            </div>
+            <div class="space-y-2">
+        `;
+
+        step.checklist.forEach((item, idx) => {
+          const itemKey = `${step.id}-${idx}`;
+          const isChecked = !!completedChecklist[itemKey];
+
+          html += `
+            <label class="flex items-start gap-3 rounded-lg border p-3 text-xs sm:text-sm transition-all cursor-pointer ${
+              isChecked ? 'border-emerald-300 bg-emerald-50/60 text-slate-800' : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-300'
+            }">
+              <input type="checkbox" data-check-key="${itemKey}" class="step-chk-box mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 cursor-pointer" ${isChecked ? 'checked' : ''}>
+              <span class="${isChecked ? 'line-through text-slate-500' : 'font-medium'}">${item}</span>
+            </label>
+          `;
+        });
+
+        html += `</div></div>`;
+      }
+
+      html += `</div></div>`;
+      container.innerHTML = html;
+
+      const copyBtn = document.getElementById('copy-code-btn');
+      if (copyBtn && step.codeBlock) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(step.codeBlock.code);
+            copyBtn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i><span class="text-emerald-400 font-semibold">복사 완료!</span>';
+            setTimeout(() => {
+              copyBtn.innerHTML = '<i class="fa-regular fa-copy text-xs"></i><span>코드 복사</span>';
+            }, 2000);
+          } catch(e) {}
+        });
+      }
+
+      const chipBtn = document.getElementById('chip-status-btn');
+      if (chipBtn) {
+        const statuses = [
+          { text: '대기 (클릭시 변경)', class: 'bg-slate-100 text-slate-700 border-slate-300' },
+          { text: '진행중 (클릭시 변경)', class: 'bg-amber-100 text-amber-800 border-amber-300' },
+          { text: '완료 (클릭시 변경)', class: 'bg-emerald-100 text-emerald-800 border-emerald-300' }
+        ];
+        let currentStatusIdx = 1;
+        chipBtn.onclick = () => {
+          currentStatusIdx = (currentStatusIdx + 1) % statuses.length;
+          const s = statuses[currentStatusIdx];
+          document.getElementById('chip-status-text').textContent = s.text;
+          chipBtn.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold ${s.class} transition-all cursor-pointer`;
+        };
+      }
+
+      const regexInput = document.getElementById('regex-input');
+      if (regexInput) {
+        const regexFeedback = document.getElementById('regex-feedback');
+        regexInput.oninput = () => {
+          const val = regexInput.value.trim();
+          const valid = /^01[0-9]{8,9}$/.test(val);
+          if (valid) {
+            regexInput.className = "w-full rounded-lg border border-emerald-400 bg-emerald-50/20 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500";
+            regexFeedback.className = "mt-2 text-xs text-emerald-700 flex items-center gap-1.5";
+            regexFeedback.innerHTML = '<i class="fa-solid fa-circle-check"></i><span><strong>입력 규칙 통과!</strong> 올바른 10~11자리 휴대폰 번호입니다.</span>';
+          } else {
+            regexInput.className = "w-full rounded-lg border border-rose-400 bg-rose-50/20 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500";
+            regexFeedback.className = "mt-2 text-xs text-rose-700 flex items-center gap-1.5";
+            regexFeedback.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span><strong>오류 안내:</strong> \'-\' 없이 올바른 10~11자리 휴대폰 번호를 입력해주세요.</span>';
+          }
+        };
+      }
+
+      document.querySelectorAll('.step-chk-box').forEach(box => {
+        box.addEventListener('change', () => {
+          const key = box.getAttribute('data-check-key');
+          completedChecklist[key] = box.checked;
+          saveChecklist();
+          renderSlide();
+          renderSidebar();
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function goToSlide(index) {
+      if (index < 0 || index >= ALL_SLIDES.length) return;
+      currentSlideIndex = index;
+      openAccordionLessonId = ALL_SLIDES[currentSlideIndex].lessonId;
+      saveSlideIndex();
+      renderSlide();
+      renderSidebar();
+      document.querySelector('main').scrollTop = 0;
+    }
+
+    document.getElementById('header-prev-btn').onclick = () => goToSlide(currentSlideIndex - 1);
+    document.getElementById('footer-prev-btn').onclick = () => goToSlide(currentSlideIndex - 1);
+    document.getElementById('header-next-btn').onclick = () => goToSlide(currentSlideIndex + 1);
+    document.getElementById('footer-next-btn').onclick = () => goToSlide(currentSlideIndex + 1);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        goToSlide(currentSlideIndex - 1);
+      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        goToSlide(currentSlideIndex + 1);
+      }
+    });
+
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    function toggleSidebar() {
+      const isHidden = sidebar.classList.contains('-translate-x-full');
+      if (isHidden) {
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.remove('hidden');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+    function closeSidebarOnMobile() {
+      if (window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+    document.getElementById('toggle-sidebar-btn').onclick = toggleSidebar;
+    document.getElementById('close-sidebar-btn').onclick = toggleSidebar;
+    backdrop.onclick = closeSidebarOnMobile;
+
+    document.getElementById('fullscreen-btn').onclick = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    };
+
+    const modal = document.getElementById('checkpoint-modal');
+    function openModal() {
+      renderModalContent();
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    document.getElementById('open-checkpoints-btn').onclick = openModal;
+    document.getElementById('sidebar-checkpoints-btn').onclick = openModal;
+    document.getElementById('close-modal-btn').onclick = closeModal;
+    document.getElementById('close-modal-footer-btn').onclick = closeModal;
+
+    function renderModalContent() {
+      let total = 0;
+      let checked = 0;
+      LESSON_DATA.forEach(l => {
+        l.steps.forEach(st => {
+          st.checklist.forEach((_, idx) => {
+            total++;
+            if (completedChecklist[`${st.id}-${idx}`]) checked++;
+          });
+        });
+      });
+      const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
+      document.getElementById('modal-percentage').textContent = `${pct}%`;
+      document.getElementById('modal-counts').textContent = `(${checked} / ${total} 항목 완료)`;
+      document.getElementById('modal-progress-bar').style.width = `${pct}%`;
+
+      const listContainer = document.getElementById('modal-list-container');
+      listContainer.innerHTML = '';
+
+      LESSON_DATA.forEach(lesson => {
+        const box = document.createElement('div');
+        box.className = "rounded-xl border border-slate-200 p-4 bg-white shadow-2xs space-y-3";
+        box.innerHTML = `
+          <div class="flex items-center justify-between border-b pb-2">
+            <h4 class="text-sm font-bold text-slate-900">${lesson.title}</h4>
+            <button class="modal-jump-btn text-xs font-semibold text-indigo-600 hover:underline" data-lesson-id="${lesson.id}">해당 교시로 이동 →</button>
+          </div>
+        `;
+
+        const stepsWrapper = document.createElement('div');
+        stepsWrapper.className = "space-y-4";
+
+        lesson.steps.forEach(st => {
+          const stepBlock = document.createElement('div');
+          stepBlock.className = "space-y-1.5 pl-1";
+          stepBlock.innerHTML = `<div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span><span>${st.stepTitle}</span></div>`;
+
+          const grid = document.createElement('div');
+          grid.className = "grid grid-cols-1 gap-1.5 pl-3";
+
+          st.checklist.forEach((chk, idx) => {
+            const itemKey = `${st.id}-${idx}`;
+            const isChecked = !!completedChecklist[itemKey];
+
+            const label = document.createElement('label');
+            label.className = `flex items-start gap-2.5 rounded-lg border p-2 text-xs cursor-pointer ${isChecked ? 'border-emerald-200 bg-emerald-50/50 text-slate-800' : 'border-slate-100 bg-slate-50/40 text-slate-600'}`;
+            label.innerHTML = `
+              <input type="checkbox" class="modal-chk-box mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 cursor-pointer" data-check-key="${itemKey}" ${isChecked ? 'checked' : ''}>
+              <span class="${isChecked ? 'line-through text-slate-400' : ''}">${chk}</span>
+            `;
+            grid.appendChild(label);
+          });
+
+          stepBlock.appendChild(grid);
+          stepsWrapper.appendChild(stepBlock);
+        });
+
+        box.appendChild(stepsWrapper);
+        listContainer.appendChild(box);
+      });
+
+      document.querySelectorAll('.modal-jump-btn').forEach(btn => {
+        btn.onclick = () => {
+          const lId = parseInt(btn.getAttribute('data-lesson-id'), 10);
+          const firstStepIdx = ALL_SLIDES.findIndex(s => s.lessonId === lId);
+          if (firstStepIdx !== -1) goToSlide(firstStepIdx);
+          closeModal();
+        };
+      });
+
+      document.querySelectorAll('.modal-chk-box').forEach(box => {
+        box.onchange = () => {
+          const key = box.getAttribute('data-check-key');
+          completedChecklist[key] = box.checked;
+          saveChecklist();
+          renderModalContent();
+          renderSlide();
+          renderSidebar();
+        };
+      });
+    }
+
+    document.getElementById('modal-reset-btn').onclick = () => {
+      if (confirm('모든 체크리스트를 초기화하시겠습니까?')) {
+        completedChecklist = {};
+        saveChecklist();
+        renderModalContent();
+        renderSlide();
+        renderSidebar();
+      }
+    };
+
+    renderSlide();
+    renderSidebar();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+<!-- Identical copy of workspace_guide.html for Vite /dist public folder -->

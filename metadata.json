@@ -1,0 +1,6 @@
+{
+  "name": "구글 워크스페이스 & Apps Script 실습 가이드 북",
+  "description": "구글 드라이브, 문서, 설문지, 스프레드시트, Apps Script 자동화까지 체계적으로 학습하는 인터랙티브 실습 가이드북",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
