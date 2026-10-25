@@ -30,16 +30,12 @@
 # 1. git 초기화 (이미 되어 있다면 생략)
 git init
 
-# 2. 모든 변경사항 추가 및 커밋
+# 1. 변경사항 추가 및 커밋
 git add .
-git commit -m "feat: 구글 워크스페이스 & Apps Script 실습 가이드북 완성"
+git commit -m "fix: Vercel 배포 시 npm ERESOLVE 의존성 충돌 해결 (.npmrc 및 package.json 수정)"
 
-# 3. 메인 브랜치 설정 및 원격 저장소 연결
-git branch -M main
-git remote add origin https://github.com/당신의깃허브아이디/google-workspace-guide.git
-
-# 4. 깃허브로 푸시
-git push -u origin main
+# 2. 깃허브로 푸시
+git push origin main
 ```
 
 ---
